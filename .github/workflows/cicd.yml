@@ -61,13 +61,14 @@ jobs:
 
       # Run unit tests only on PRs to keep CI fast
       - name: Test (Vitest)
+        id: vitest
         if: ${{ github.event_name == 'pull_request' }}
         env:
           CI: true
         run: pnpm run test:ci
 
       - name: Vitest Coverage Report
-        if: ${{ github.event_name == 'pull_request' && always() }}
+        if: ${{ github.event_name == 'pull_request' && steps.vitest.outcome == 'success' && hashFiles('coverage/coverage-summary.json') != '' }}
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           json-summary-path: coverage/coverage-summary.json
