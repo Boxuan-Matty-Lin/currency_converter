@@ -54,7 +54,6 @@ export function CurrencySidebar() {
             <div className="flex items-center gap-2 text-sm font-medium uppercase">
               <span className="text-2xl leading-none">🇦🇺</span>
               <span>AUD</span>
-              {/* <ChevronDown className="h-4 w-4 text-muted-foreground" /> */}
             </div>
 
             <div className="flex-1 pl-1">
