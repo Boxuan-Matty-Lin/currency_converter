@@ -35,8 +35,10 @@ export function CurrencySidebar() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || res.statusText);
       setRates(data?.rates ?? null);
-    } catch (error: any) {
-      setErr(error?.message || "Failed to load rates");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to load rates";
+      setErr(message);
     } finally {
       setLoading(false);
     }
@@ -55,13 +57,15 @@ export function CurrencySidebar() {
               {/* <ChevronDown className="h-4 w-4 text-muted-foreground" /> */}
             </div>
 
-            <Input
-              id="aud-amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              inputMode="decimal"
-              className="flex-1 border-0 bg-transparent px-0 text-right text-lg font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
+            <div className="flex-1 pl-1">
+              <Input
+                id="aud-amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                inputMode="decimal"
+                className="w-full border-0 bg-transparent text-left text-lg font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
 
             <Button
               variant="outline"

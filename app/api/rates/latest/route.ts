@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data, {
       headers: { "Cache-Control": "no-store, must-revalidate" },
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message ?? "fetch failed" }, { status: 502 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "fetch failed";
+    return NextResponse.json({ error: message }, { status: 502 });
   }
 }
