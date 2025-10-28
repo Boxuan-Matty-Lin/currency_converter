@@ -1,0 +1,108 @@
+name: CICD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:  # Quality gates: linting, type checking, and unit tests for fast feedback
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install pnpm first so setup-node's pnpm cache can find it
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # Setup Node and enable the built-in pnpm cache
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Verify pnpm
+        run: pnpm -v
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Static checks
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      # Run unit tests only on PRs to keep CI fast
+      - name: Test (Vitest)
+        id: vitest
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          CI: true
+        run: pnpm run test:ci
+
+      - name: Vitest Coverage Report
+        if: ${{ github.event_name == 'pull_request' && steps.vitest.outcome == 'success' && hashFiles('coverage/coverage-summary.json') != '' }}
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: coverage/coverage-summary.json
+          json-final-path: coverage/coverage-final.json
+
+  build:
+    # Build only on pushes to main to avoid duplicate work on PRs
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Install pnpm first
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      # Setup Node with pnpm cache
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Verify pnpm
+        run: pnpm -v
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build production artifacts
+      - name: Build
+        run: pnpm build
