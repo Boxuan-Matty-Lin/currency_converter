@@ -1,13 +1,20 @@
-import CurrencyCards from "@/components/CurrencyCards";
+// app/page.tsx
+import { CurrencySidebar } from "@/components/sidebar/CurrencySidebar";
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-5xl p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Latest AUD Conversions</h1>
-      <p className="text-sm text-muted-foreground">
-        Using AUD as base. Click “Refresh rates” to fetch the latest snapshot.
-      </p>
-      <CurrencyCards />
+    <main className="min-h-screen bg-background">
+      <div className="flex min-h-screen w-full">
+        <section className="flex min-h-screen w-full flex-col gap-5 px-4 py-6 sm:px-6 lg:w-1/3 lg:px-8 xl:px-10">
+          <header className="space-y-1">
+            <h1 className="text-2xl font-semibold">CURRENCY CONVERTER</h1>
+          </header>
+
+          <CurrencySidebar />
+        </section>
+
+        <div className="hidden flex-1 lg:block" />
+      </div>
     </main>
   );
 }

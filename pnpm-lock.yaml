@@ -20,6 +20,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      lucide:
+        specifier: ^0.548.0
+        version: 0.548.0
       lucide-react:
         specifier: ^0.548.0
         version: 0.548.0(react@19.2.0)
@@ -1623,6 +1626,9 @@ packages:
     resolution: {integrity: sha512-63b16z63jM9yc1MwxajHeuu0FRZFsDtljtDjYm26Kd86UQ5HQzu9ksEtoUUw4RBuewodw/tGFmvipePvRsKeDA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide@0.548.0:
+    resolution: {integrity: sha512-G9MtqYAKogbp23KCY+6jM/hQQLs9252z9IgmctZn2Fi95+ukR2jpXmUt4+y0q6bb9DrC+9P1jNymHLcyUgtapg==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3767,6 +3773,8 @@ snapshots:
   lucide-react@0.548.0(react@19.2.0):
     dependencies:
       react: 19.2.0
+
+  lucide@0.548.0: {}
 
   magic-string@0.30.21:
     dependencies:
