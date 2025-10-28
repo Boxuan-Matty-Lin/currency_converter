@@ -13,12 +13,13 @@ type Props = {
   className?: string;
 };
 
-const fmtAmt = (n: number) =>
+const fmtAmt = (value: number, code: string) =>
   new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: "AUD",
+    currency: code,
     maximumFractionDigits: 2,
-  }).format(n);
+  }).format(value);
+
 
 const fmtRate = (n: number) =>
   new Intl.NumberFormat(undefined, {
@@ -46,8 +47,10 @@ export function CurrencyCard({
               )}
             </div>
           </div>
-          <div className="text-xl font-semibold tabular-nums">
-            {amount == null ? "—" : fmtAmt(amount)}
+          <div className="max-w-[220px] overflow-x-auto">
+            <div className="text-xl font-semibold tabular-nums inline-block whitespace-nowrap">
+              {amount == null ? "—" : fmtAmt(amount, code)}
+            </div>
           </div>
         </div>
 
