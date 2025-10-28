@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest"
+    "test": "vitest",
+    "test:ci": "vitest run --coverage --reporter=dot"
   },
   "dependencies": {
     "next": "16.0.0",
@@ -24,6 +25,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/coverage-v8": "^4.0.4",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "happy-dom": "^20.0.8",
