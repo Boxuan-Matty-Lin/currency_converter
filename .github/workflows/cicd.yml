@@ -23,6 +23,10 @@ concurrency:
 jobs:
   checks:  # Quality gates: linting, type checking, and unit tests for fast feedback
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,9 +60,19 @@ jobs:
         run: pnpm tsc --noEmit
 
       # Run unit tests only on PRs to keep CI fast
-      - name: Test
+      - name: Test (Vitest)
+        id: vitest
         if: ${{ github.event_name == 'pull_request' }}
-        run: pnpm test -- --ci
+        env:
+          CI: true
+        run: pnpm run test:ci
+
+      - name: Vitest Coverage Report
+        if: ${{ github.event_name == 'pull_request' && steps.vitest.outcome == 'success' && hashFiles('coverage/coverage-summary.json') != '' }}
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: coverage/coverage-summary.json
+          json-final-path: coverage/coverage-final.json
 
   build:
     # Build only on pushes to main to avoid duplicate work on PRs
