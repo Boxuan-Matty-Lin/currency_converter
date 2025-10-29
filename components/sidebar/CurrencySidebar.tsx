@@ -39,14 +39,16 @@ export function CurrencySidebar() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || res.statusText);
       setRates(data?.rates ?? null);
-    } catch (error) {
-    // set error message
-    setErr("Failed to load rates");
+    } catch (e: unknown) {
+      // Log error details for debugging
+      console.error("[rates/latest] fetch failed:", e);
 
-  } finally {
-    setLoading(false);
-  }
-};
+      // user-friendly error message
+      setErr("Failed to load rates. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const amt = Number(amount) || 0;
 

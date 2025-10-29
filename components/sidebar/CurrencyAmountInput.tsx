@@ -1,7 +1,7 @@
 // components/sidebar/CurrencyAmountInput.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Input } from "@/components/ui";
 import { RefreshCw, Info } from "lucide-react";
 
@@ -16,7 +16,7 @@ type Props = {
   onRefresh: () => void;
 };
 
-const DECIMAL_REGEX = /^\d*(\.\d*)?$/; // Matches valid decimal numbers
+const DECIMAL_REGEX = /^\d*(\.\d*)?$/; // Matches numeric characters with optional decimal point
 
 /**
  * Numeric amount input with AUD label and refresh action.
@@ -32,10 +32,6 @@ export function CurrencyAmountInput({
 }: Props) {
   const [inputError, setInputError] = useState(""); // Validation error message
 
-  useEffect(() => {
-    setInputError("");
-  }, [amount]);  
-
   const handleChange = (value: string) => {
     if (value === "" || DECIMAL_REGEX.test(value)) {
       setInputError("");
@@ -43,7 +39,7 @@ export function CurrencyAmountInput({
     } else {
       setInputError("Use numbers only");
     }
-  };  
+  };
 
   return (
     <div className="flex items-center gap-3">
