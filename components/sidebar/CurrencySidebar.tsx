@@ -23,7 +23,7 @@ const META: Record<string, { flag: string; label: string }> = {
  */
 export function CurrencySidebar() {
   const [rates, setRates] = useState<Rates | null>(null);
-  const [amount, setAmount] = useState("100");
+  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -39,14 +39,14 @@ export function CurrencySidebar() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || res.statusText);
       setRates(data?.rates ?? null);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to load rates";
-      setErr(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    } catch (error) {
+    // set error message
+    setErr("Failed to load rates");
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   const amt = Number(amount) || 0;
 
@@ -62,13 +62,29 @@ export function CurrencySidebar() {
           />
         </CardContent>
       </Card>
-      {err && <span className="text-sm text-red-600">{err}</span>}
+      {err && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          data-testid="error-box"
+          className="text-sm text-red-600"
+        >
+          {err}
+        </div>
+      )}
 
       <div className="flex-1">
         {loading ? (
           <div className="flex h-full flex-col gap-2">
             {Array.from({ length: TARGETS.length }).map((_, i) => (
-              <Skeleton key={i} className="flex-1 rounded-xl" />
+              <div
+                key={i}
+                role="status"
+                aria-label="Loading currency card"
+                data-testid="skeleton"
+              >
+                <Skeleton className="flex-1 rounded-xl" />
+              </div>
             ))}
           </div>
         ) : (
