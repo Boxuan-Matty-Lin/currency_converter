@@ -2,9 +2,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, Input, Button, Skeleton } from "@/components/ui";
+import { Card, CardContent, Skeleton } from "@/components/ui";
 import { CurrencyCard } from "./CurrencyCard";
-import { RefreshCw } from "lucide-react";
+import { CurrencyAmountInput } from "./CurrencyAmountInput";
 
 type Rates = Record<string, number>;
 const TARGETS = ["USD", "EUR", "JPY", "GBP", "CNY"] as const;
@@ -17,9 +17,13 @@ const META: Record<string, { flag: string; label: string }> = {
   CNY: { flag: "🇨🇳", label: "Chinese Yuan" },
 };
 
+/**
+ * Sidebar panel showing AUD amount input and a stack of converted currency cards.
+ * Handles fetching latest rates and manages loading/error state.
+ */
 export function CurrencySidebar() {
   const [rates, setRates] = useState<Rates | null>(null);
-  const [amount, setAmount] = useState("100");
+  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
@@ -35,10 +39,12 @@ export function CurrencySidebar() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || res.statusText);
       setRates(data?.rates ?? null);
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to load rates";
-      setErr(message);
+    } catch (e: unknown) {
+      // Log error details for debugging
+      console.error("[rates/latest] fetch failed:", e);
+
+      // user-friendly error message
+      setErr("Failed to load rates. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -50,47 +56,37 @@ export function CurrencySidebar() {
     <aside className="flex h-full flex-col gap-3">
       <Card className="rounded-xl border shadow-sm py-4">
         <CardContent className="px-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm font-medium uppercase">
-              <span className="text-2xl leading-none">🇦🇺</span>
-              <span>AUD</span>
-            </div>
-
-            <div className="flex-1 pl-1">
-              <Input
-                id="aud-amount"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                inputMode="decimal"
-                className="w-full border-0 bg-transparent text-left text-lg font-semibold shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-            </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={refresh}
-              className="shrink-0"
-              disabled={loading}
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${
-                  loading ? "animate-spin text-primary" : ""
-                }`}
-                aria-hidden
-              />
-              <span className="sr-only">Refresh rates</span>
-            </Button>
-          </div>
+          <CurrencyAmountInput
+            amount={amount}
+            loading={loading}
+            onAmountChange={setAmount}
+            onRefresh={refresh}
+          />
         </CardContent>
       </Card>
-      {err && <span className="text-sm text-red-600">{err}</span>}
+      {err && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          data-testid="error-box"
+          className="text-sm text-red-600"
+        >
+          {err}
+        </div>
+      )}
 
       <div className="flex-1">
         {loading ? (
           <div className="flex h-full flex-col gap-2">
             {Array.from({ length: TARGETS.length }).map((_, i) => (
-              <Skeleton key={i} className="flex-1 rounded-xl" />
+              <div
+                key={i}
+                role="status"
+                aria-label="Loading currency card"
+                data-testid="skeleton"
+              >
+                <Skeleton className="flex-1 rounded-xl" />
+              </div>
             ))}
           </div>
         ) : (

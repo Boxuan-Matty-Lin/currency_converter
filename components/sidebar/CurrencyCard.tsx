@@ -4,12 +4,21 @@
 import { Card, CardContent } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
+/**
+ * Displays a single currency conversion card with amount, rate, and metadata.
+ */
 type Props = {
+  /** ISO currency code (e.g. USD) */
   code: string;
+  /** Optional emoji/icon representing the currency */
   flag?: string;
+  /** Human-readable currency name */
   label?: string;
+  /** Converted amount from AUD, null when unavailable */
   amount: number | null;
+  /** AUD → target currency rate, null when unavailable */
   rate: number | null;
+  /** Optional className overrides */
   className?: string;
 };
 
@@ -25,6 +34,10 @@ const fmtRate = (n: number) =>
     maximumFractionDigits: 4,
   }).format(n);
 
+/**
+ * Renders a currency card with flag, code, converted amount, and AUD rate.
+ * Amount scrolls horizontally if it overflows.
+ */
 export function CurrencyCard({
   code,
   flag,
