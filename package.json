@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest -c vitest.config.mts",
-    "test:ci": "CI_API_TEST=1 vitest run -c vitest.config.mts --coverage --reporter=dot",
+    "test:ci": "vitest run -c vitest.config.mts --coverage --reporter=dot",
     "test:unit": "vitest -c vitest.config.mts --project unit",
     "test:integration": "CI_API_TEST=1 vitest run -c vitest.config.mts --project integration --reporter=dot"
   },

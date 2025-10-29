@@ -62,9 +62,10 @@ jobs:
       # Run unit tests only on PRs to keep CI fast
       - name: Test (Vitest)
         id: vitest
-        if: ${{ github.event_name == 'pull_request' }}
         env:
           CI: true
+          CI_API_TEST: ${{ secrets.OXR_APP_ID && '1' || '0' }}
+          OXR_APP_ID: ${{ secrets.OXR_APP_ID }}
         run: pnpm run test:ci
 
       - name: Vitest Coverage Report
