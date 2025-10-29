@@ -24,7 +24,7 @@ export type ConvertResult = {
 /**
  * Default currency codes returned when no targets are provided.
  */
-export const DEFAULTS_CURRENCY = ["USD", "EUR", "JPY", "GBP", "CNY"] as const;
+export const DEFAULTS_CURRENCY = ["USD", "EUR", "JPY", "GBP", "CNY"];
 
 /**
  * Re-bases exchange rates from USD to AUD (1 AUD -> target).

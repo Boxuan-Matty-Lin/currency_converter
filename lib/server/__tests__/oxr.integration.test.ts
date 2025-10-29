@@ -1,6 +1,6 @@
 // tests/integration/oxr.integration.test.ts
 // @vitest-environment node
-import { describe, it, expect , vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 // 1) Avoid Next runtime constraints in Node
 vi.mock("server-only", () => ({}));
@@ -27,7 +27,7 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 2) {
   throw lastErr;
 }
 
-(run && envOK ? describe : describe.skip)("integration: oxr.getLatest()", () => {
+(run && envOK ? describe : describe.skip)("integration: oxr endpoints", () => {
   it(
     "hits real upstream and returns a USD-based table including AUD",
     async () => {
@@ -52,6 +52,30 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 2) {
       expect(aud).toBeLessThan(1000);
     },
     30_000 // generous timeout for network
+  );
+
+  it(
+    "fetches historical snapshot for the previous UTC day",
+    async () => {
+      const { getHistorical } = await import("../oxr");
+
+      const now = new Date();
+      const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      todayUTC.setUTCDate(todayUTC.getUTCDate() - 1);
+      const dateISO = todayUTC.toISOString().slice(0, 10);
+
+      const data = await withRetry(() => getHistorical(dateISO), 2);
+
+      expect(data.base).toBe("USD");
+      expect(data.timestamp).toBeGreaterThan(0);
+      expect(data.rates).toHaveProperty("AUD");
+
+      const aud = data.rates["AUD"];
+      expect(typeof aud).toBe("number");
+      expect(aud).toBeGreaterThan(0);
+      expect(aud).toBeLessThan(1000);
+    },
+    30_000
   );
 });
 
