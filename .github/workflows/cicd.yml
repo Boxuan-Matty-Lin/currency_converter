@@ -66,6 +66,7 @@ jobs:
           CI: true
           CI_API_TEST: ${{ secrets.OXR_APP_ID && '1' || '0' }}
           OXR_APP_ID: ${{ secrets.OXR_APP_ID }}
+          OXR_BASE_URL: ${{ secrets.OXR_BASE_URL }}
         run: pnpm run test:ci
 
       - name: Vitest Coverage Report
