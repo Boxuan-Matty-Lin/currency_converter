@@ -8,8 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest",
-    "test:ci": "vitest run --coverage --reporter=dot"
+    "test": "vitest -c vitest.config.mts",
+    "test:ci": "CI_API_TEST=1 vitest run -c vitest.config.mts --coverage --reporter=dot",
+    "test:unit": "vitest -c vitest.config.mts --project unit",
+    "test:integration": "CI_API_TEST=1 vitest run -c vitest.config.mts --project integration --reporter=dot"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
@@ -35,6 +37,7 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/coverage-v8": "^4.0.4",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
     "happy-dom": "^20.0.8",
