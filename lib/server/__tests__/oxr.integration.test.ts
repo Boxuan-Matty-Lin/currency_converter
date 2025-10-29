@@ -57,7 +57,6 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 2) {
 
 // Helpful message when skipped
 if (run && !envOK) {
-  // eslint-disable-next-line no-console
   console.warn(
     "[integration:oxr] Skipped because OXR_BASE_URL or OXR_APP_ID is missing."
   );

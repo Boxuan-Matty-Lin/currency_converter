@@ -8,7 +8,7 @@ vi.mock("server-only", () => ({}));
 // 2) Mock downstream data source used by the module under test
 const getLatestMock = vi.fn();
 vi.mock("../oxr", () => ({
-  getLatest: (...args: any[]) => getLatestMock(...args),
+  getLatest: (...args: unknown[]) => getLatestMock(...args),
 }));
 
 // 3) Import the module under test

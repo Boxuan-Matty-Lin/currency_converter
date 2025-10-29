@@ -8,15 +8,18 @@ describe("oxr", () => {
   beforeEach(() => {
     process.env.OXR_BASE_URL = "https://api.test";
     process.env.OXR_APP_ID = "test-key";
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        timestamp: 1,
-        base: "USD",
-        rates: { AUD: 1.0 }
-      }),
-    }) as any;
-  });
+
+  const mockFetch: typeof fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      timestamp: 1,
+      base: "USD",
+      rates: { AUD: 1.0 },
+    }),
+  } as unknown as Response); // 这里返回值“长得像”Response
+
+  globalThis.fetch = mockFetch;
+});
 
   it("calls correct URL and returns data", async () => {
     const { getLatest } = await import("../oxr"); // dynamic import after setting env
