@@ -1,0 +1,27 @@
+# Git / VCS
+.git
+.gitignore
+
+# Node dependencies & caches
+node_modules
+.pnpm-store
+.npm
+.cache
+.next/cache
+
+# Build outputs & coverage
+.next
+dist
+coverage
+
+# Logs & editor settings
+*.log
+logs
+*.swp
+*.swo
+.vscode
+.idea
+
+# Env files (改为在运行容器时注入)
+.env
+.env.*

@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      target: dev        
+    command: pnpm dev
+    ports: ["3000:3000"]
+    env_file:
+      - .env.development
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "1"   
+    volumes:
+      - .:/app
+      - node-mod:/app/node_modules
+volumes:
+  node-mod:
