@@ -72,4 +72,24 @@ export async function getLatest(): Promise<RatesResponse> {
 
 
 
+/** * Shape of Open Exchange Rates historical payload.
+ */
+export type HistoricalResponse = {
+  timestamp: number;         // Unix timestamp
+  base: "USD";
+  rates: Record<string, number>;
+  disclaimer?: string;
+  license?: string;
+};
 
+
+
+/** * Fetches historical exchange rates for a specific date from Open Exchange Rates.
+ *
+ * @param dateISO - Date string in `YYYY-MM-DD` format (UTC).
+ * @returns A promise resolving to the `HistoricalResponse` payload.
+ */
+export async function getHistorical(dateISO: string): Promise<HistoricalResponse> {
+  // dateISO = YYYY-MM-DD（UTC）
+  return oxrFetch<HistoricalResponse>(`/historical/${dateISO}.json`);
+}
