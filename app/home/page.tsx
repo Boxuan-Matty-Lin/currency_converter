@@ -39,7 +39,11 @@ export default function Home() {
   const isDesktop = useResponsiveDesktop();
 
   // Modal control (Escape + body scroll lock are handled inside the hook)
-  const { isChartModalOpen, openModal, closeModal } = useChartModal(isDesktop);
+  const { isChartModalOpen, openModal, closeModal } = useChartModal();
+
+  useEffect(() => {
+    if (isDesktop) closeModal();
+  }, [closeModal, isDesktop]);
 
   // Historical series (last 13 days)
   const {
