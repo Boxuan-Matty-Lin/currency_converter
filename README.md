@@ -3,12 +3,12 @@
 ## Project Overview
 This is a currency conversion web application that allows users to input an amount in Australian dollars (AUD) and instantly convert it into five target currencies: USD, EUR, JPY, GBP, and CNY. The interface also provides a 14-day time series chart that visualizes historical exchange rates for the selected currency pair.
 
-- [Light mode – desktop](./light-mode-pc.png)
-- [Light mode – mobile (conversion view)](./light-mode-mobile-1.png)
-- [Light mode – mobile (history view)](./light-mode-mobile-2.png)
-- [Night mode – desktop](./night-mode-pc.png)
-- [Night mode – mobile (conversion view)](./night-mode-mobile-1.png)
-- [Night mode – mobile (history view)](./night-mode-mobile-2.png)
+- [Light mode – desktop](./demophoto/light-mode-pc.png)
+- [Light mode – mobile (conversion view)](./demophoto/light-mode-mobile-1.png)
+- [Light mode – mobile (history view)](./demophoto/light-mode-mobile-2.png)
+- [Night mode – desktop](./demophoto/night-mode-pc.png)
+- [Night mode – mobile (conversion view)](./demophoto/night-mode-mobile-1.png)
+- [Night mode – mobile (history view)](./demophoto/night-mode-mobile-2.png)
 - [Demo video](https://www.youtube.com/watch?v=73UDpnPi7-I)
 
 **Tech Stack:** ui:next.js 16 + react 19 + tailwindcss 4 + lucide / data:open exchange rates API / charts:recharts / testing:vitest + testing-library + happy-dom / tooling:pnpm + TypeScript + eslint
