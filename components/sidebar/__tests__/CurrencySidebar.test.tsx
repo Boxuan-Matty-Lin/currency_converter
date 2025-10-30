@@ -1,79 +1,74 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach , type Mock  } from "vitest";
-import { CurrencySidebar } from "../CurrencySidebar";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import type { ComponentProps } from "react";
+import { CurrencySidebar, type Rates, TARGET_CODES } from "../CurrencySidebar";
 
-const mockRatesResponse = {
-  base: "AUD",
-  timestamp: 1234567890,
-  rates: {
-    USD: 0.65,
-    EUR: 0.6,
-    JPY: 95,
-    GBP: 0.5,
-    CNY: 4.2,
-  },
+const rates: Rates = {
+  USD: 0.65,
+  EUR: 0.6,
+  JPY: 95,
+  GBP: 0.5,
+  CNY: 4.2,
 };
 
 describe("CurrencySidebar", () => {
-  const originalFetch = global.fetch;
+  const renderSidebar = (override?: Partial<ComponentProps<typeof CurrencySidebar>>) => {
+    const props: ComponentProps<typeof CurrencySidebar> = {
+      amount: "",
+      rates,
+      loading: false,
+      error: "",
+      onAmountChange: vi.fn(),
+      onRefresh: vi.fn(),
+      selectedCode: TARGET_CODES[0],
+      onSelectCurrency: vi.fn(),
+      ...override,
+    };
+    return {
+      props,
+      ...render(<CurrencySidebar {...props} />),
+    };
+  };
 
-  beforeEach(() => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockRatesResponse),
-    } as Response);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-    global.fetch = originalFetch;
-  });
-
-  it("renders skeletons during loading and updates cards after user inputs amount", async () => {
-    render(<CurrencySidebar />);
-    // Loading state shows skeleton items (status role from Skeleton)
+  it("renders skeletons while loading", () => {
+    renderSidebar({ loading: true, rates: null });
     expect(screen.getAllByRole("status")).toHaveLength(5);
+  });
 
-    // Wait for cards to appear after fetch completes
-    await waitFor(() => {
-      expect(screen.getByText("USD")).toBeInTheDocument();
-      expect(screen.getByText("EUR")).toBeInTheDocument();
-    });
+  it("displays converted amounts when rates and amount are provided", () => {
+    renderSidebar({ amount: "100" });
 
-    // Simulate user entering an amount
-    const input = screen.getByPlaceholderText(/enter amount/i);
-    fireEvent.change(input, { target: { value: "100" } });
+    expect(screen.getByText("USD")).toBeInTheDocument();
+    expect(screen.getByText("EUR")).toBeInTheDocument();
 
     const expectedUsdAmount = new Intl.NumberFormat(undefined, {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 2,
-    }).format(100 * mockRatesResponse.rates.USD);
+    }).format(100 * rates.USD);
 
-    await waitFor(() => {
-      expect(screen.getByText(expectedUsdAmount)).toBeInTheDocument();
-    });
+    expect(screen.getByText(expectedUsdAmount)).toBeInTheDocument();
   });
 
-  it("shows error message when fetch fails", async () => {
-(global.fetch as unknown as Mock).mockRejectedValueOnce(new Error("Network error"));
+  it("invokes callbacks for amount changes and refresh", () => {
+    const onAmountChange = vi.fn();
+    const onRefresh = vi.fn();
+    const { props } = renderSidebar({ onAmountChange, onRefresh });
 
-    render(<CurrencySidebar />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/failed to load rates/i)).toBeInTheDocument();
-    });
-  });
-
-  it("triggers refresh when clicking refresh button", async () => {
-    render(<CurrencySidebar />);
-
-    await waitFor(() => {
-      expect(screen.getByText("USD")).toBeInTheDocument();
-    });
+    const input = screen.getByPlaceholderText(/enter amount/i);
+    fireEvent.change(input, { target: { value: "50" } });
+    expect(onAmountChange).toHaveBeenCalledWith("50");
 
     fireEvent.click(screen.getByRole("button", { name: /refresh rates/i }));
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: /USD/ }));
+    expect(props.onSelectCurrency).toHaveBeenCalledWith("USD");
+  });
+
+  it("shows error message when provided", () => {
+    renderSidebar({ error: "Failed to load rates. Please try again." });
+    expect(screen.getByText(/failed to load rates/i)).toBeInTheDocument();
   });
 });

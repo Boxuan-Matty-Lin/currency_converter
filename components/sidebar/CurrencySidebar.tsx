@@ -1,15 +1,15 @@
 // components/sidebar/CurrencySidebar.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { CurrencyCard } from "./CurrencyCard";
 import { CurrencyAmountInput } from "./CurrencyAmountInput";
 
-type Rates = Record<string, number>;
-const TARGETS = ["USD", "EUR", "JPY", "GBP", "CNY"] as const;
+export type Rates = Record<string, number>;
+export const TARGET_CODES = ["USD", "EUR", "JPY", "GBP", "CNY"] as const;
+export type TargetCode = typeof TARGET_CODES[number];
 
-const META: Record<string, { flag: string; label: string }> = {
+export const CURRENCY_META: Record<TargetCode, { flag: string; label: string }> = {
   USD: { flag: "🇺🇸", label: "United States Dollar" },
   EUR: { flag: "🇪🇺", label: "Euro" },
   JPY: { flag: "🇯🇵", label: "Japanese Yen" },
@@ -19,37 +19,29 @@ const META: Record<string, { flag: string; label: string }> = {
 
 /**
  * Sidebar panel showing AUD amount input and a stack of converted currency cards.
- * Handles fetching latest rates and manages loading/error state.
+ * Receives data and event handlers from parent.
  */
-export function CurrencySidebar() {
-  const [rates, setRates] = useState<Rates | null>(null);
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState("");
+export type CurrencySidebarProps = {
+  amount: string;
+  rates: Rates | null;
+  loading: boolean;
+  error: string;
+  selectedCode: TargetCode;
+  onAmountChange: (value: string) => void;
+  onRefresh: () => void;
+  onSelectCurrency: (code: TargetCode) => void;
+};
 
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  const refresh = async () => {
-    try {
-      setLoading(true);
-      setErr("");
-      const res = await fetch("/api/rates/latest", { cache: "no-store" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || res.statusText);
-      setRates(data?.rates ?? null);
-    } catch (e: unknown) {
-      // Log error details for debugging
-      console.error("[rates/latest] fetch failed:", e);
-
-      // user-friendly error message
-      setErr("Failed to load rates. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export function CurrencySidebar({
+  amount,
+  rates,
+  loading,
+  error,
+  selectedCode,
+  onAmountChange,
+  onRefresh,
+  onSelectCurrency,
+}: CurrencySidebarProps) {
   const amt = Number(amount) || 0;
 
   return (
@@ -59,26 +51,26 @@ export function CurrencySidebar() {
           <CurrencyAmountInput
             amount={amount}
             loading={loading}
-            onAmountChange={setAmount}
-            onRefresh={refresh}
+            onAmountChange={onAmountChange}
+            onRefresh={onRefresh}
           />
         </CardContent>
       </Card>
-      {err && (
+      {error && (
         <div
           role="alert"
           aria-live="assertive"
           data-testid="error-box"
           className="text-sm text-red-600"
         >
-          {err}
+          {error}
         </div>
       )}
 
       <div className="flex-1">
         {loading ? (
           <div className="flex h-full flex-col gap-2">
-            {Array.from({ length: TARGETS.length }).map((_, i) => (
+            {Array.from({ length: TARGET_CODES.length }).map((_, i) => (
               <div
                 key={i}
                 role="status"
@@ -91,9 +83,9 @@ export function CurrencySidebar() {
           </div>
         ) : (
           <div className="flex h-full flex-col gap-2">
-            {TARGETS.map((code) => {
+            {TARGET_CODES.map((code) => {
               const rate = rates?.[code] ?? null;
-              const meta = META[code];
+              const meta = CURRENCY_META[code];
               return (
                 <div key={code} className="flex-1">
                   <CurrencyCard
@@ -103,6 +95,8 @@ export function CurrencySidebar() {
                     rate={rate}
                     amount={rate == null ? null : amt * rate}
                     className="h-full"
+                    selected={selectedCode === code}
+                    onSelect={() => onSelectCurrency(code)}
                   />
                 </div>
               );

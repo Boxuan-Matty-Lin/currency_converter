@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
 import { CurrencyCard } from "../CurrencyCard";
 
 describe("CurrencyCard", () => {
@@ -46,5 +46,38 @@ describe("CurrencyCard", () => {
 
     const scrollContainer = container.querySelector(".max-w-\\[220px\\]");
     expect(scrollContainer).toHaveClass("overflow-x-auto");
+  });
+
+  it("handles selection interactions when onSelect is provided", () => {
+    const handleSelect = vi.fn();
+    const { rerender } = render(
+      <CurrencyCard
+        code="USD"
+        flag="🇺🇸"
+        label="United States Dollar"
+        amount={65.55}
+        rate={0.6555}
+        onSelect={handleSelect}
+      />
+    );
+
+    const button = screen.getByRole("button", { name: /USD/ });
+    fireEvent.click(button);
+    expect(handleSelect).toHaveBeenCalledTimes(1);
+    expect(button).toHaveAttribute("aria-pressed", "false");
+
+    rerender(
+      <CurrencyCard
+        code="USD"
+        flag="🇺🇸"
+        label="United States Dollar"
+        amount={65.55}
+        rate={0.6555}
+        onSelect={handleSelect}
+        selected
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /USD/ })).toHaveAttribute("aria-pressed", "true");
   });
 });
