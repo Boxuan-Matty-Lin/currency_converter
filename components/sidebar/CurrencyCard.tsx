@@ -1,8 +1,10 @@
 // components/sidebar/CurrencyCard.tsx
 "use client";
 
+import { useCallback } from "react";
 import { Card, CardContent } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import type { KeyboardEvent } from "react";
 
 /**
  * Displays a single currency conversion card with amount, rate, and metadata.
@@ -20,6 +22,10 @@ type Props = {
   rate: number | null;
   /** Optional className overrides */
   className?: string;
+  /** Whether this card is currently selected */
+  selected?: boolean;
+  /** Handler invoked when the card is selected */
+  onSelect?: () => void;
 };
 
 const fmtAmt = (value: number, code: string) =>
@@ -45,9 +51,42 @@ export function CurrencyCard({
   amount,
   rate,
   className,
+  selected = false,
+  onSelect,
 }: Props) {
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!onSelect) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onSelect();
+      }
+    },
+    [onSelect]
+  );
+
+  const interactiveProps = onSelect
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        onClick: onSelect,
+        onKeyDown: handleKeyDown,
+        "aria-pressed": selected,
+        "aria-label": label ? `${code} – ${label}` : code,
+      }
+    : {};
+
   return (
-    <Card className={cn("h-full rounded-xl border shadow-sm py-4", className)}>
+    <Card
+      className={cn(
+        "h-full rounded-xl border py-4 transition-shadow",
+        onSelect ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" : "",
+        selected ? "border-primary bg-primary/5 shadow-lg" : "shadow-sm",
+        !selected && onSelect ? "hover:shadow-md" : "",
+        className
+      )}
+      {...interactiveProps}
+    >
       <CardContent className="flex h-full flex-col justify-between space-y-3 px-4 py-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -14,6 +14,7 @@
     "test:integration": "CI_API_TEST=1 vitest run -c vitest.config.mts --project integration --reporter=dot"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
