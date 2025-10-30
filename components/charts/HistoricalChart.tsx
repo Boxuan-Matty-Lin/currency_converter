@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useMemo } from "react";
+import { useTheme } from "next-themes";
 
 export type Point = { date: string; value: number };
 
@@ -29,7 +30,10 @@ export default function HistoricalChart({
   className,
 }: Props) {
   // 最后一个点，用于高亮当前值
-  const lastPoint = useMemo(() => (data && data.length ? data[data.length - 1] : null), [data]);
+  const lastPoint = useMemo(
+    () => (data && data.length ? data[data.length - 1] : null),
+    [data]
+  );
 
   const { domain, ticks } = useMemo(() => {
     if (!data?.length) return { domain: undefined, ticks: [] as number[] };
@@ -41,27 +45,29 @@ export default function HistoricalChart({
     const max = Math.max(...values);
     const span = max - min;
 
-    const padding = span === 0
-      ? Math.max(Math.abs(max || min), 1) * 0.05
-      : span * 0.1;
+    const padding =
+      span === 0 ? Math.max(Math.abs(max || min), 1) * 0.05 : span * 0.1;
 
     const lower = min - padding;
     const upper = max + padding;
     const steps = 4;
-    const ticks: number[] = [];
+    const t: number[] = [];
     for (let i = 0; i <= steps; i++) {
       const v = lower + ((upper - lower) * i) / steps;
-      ticks.push(v);
+      t.push(v);
     }
 
     return {
       domain: [lower, upper] as [number, number],
-      ticks,
+      ticks: t,
     };
   }, [data]);
 
   const yAxisDomain = domain ?? (["auto", "auto"] as ["auto", "auto"]);
   const yAxisTicks = ticks.length ? ticks : undefined;
+
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   return (
     <div className={`rounded-xl border p-6 ${className ?? ""}`}>
@@ -73,14 +79,7 @@ export default function HistoricalChart({
       <div className="h-72 w-full">
         <ResponsiveContainer>
           <AreaChart data={data}>
-            <defs>
-              <linearGradient id="fxFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopOpacity={0.2} />
-                <stop offset="95%" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-
-            {/* 时间轴隐藏刻度线，用 CSS 留白来还原你给的简洁风 */}
+            {/* 时间轴保持简洁，不改默认配色 */}
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -98,9 +97,25 @@ export default function HistoricalChart({
               tickFormatter={(v) => Number(v).toFixed(decimals)}
             />
 
+            {/* 只调整 Tooltip 尺寸与圆角
+                暗黑模式下灰底和灰白字，其余保持原生 */}
             <Tooltip
+              contentStyle={{
+                ...(isDark
+                  ? {
+                      background: "hsl(var(--muted))",           // 灰底
+                      color: "hsl(var(--muted-foreground))",     // 灰白字
+                    }
+                  : {}),
+                padding: "6px 8px",                              // 更小
+                borderRadius: "10px",                            // 圆角
+              }}
+              labelStyle={{ fontSize: 12, marginBottom: 2, lineHeight: 1.2 }}
+              itemStyle={{ fontSize: 12, lineHeight: 1.2 }}
               labelFormatter={(d) => d as string}
-              formatter={(v: any) => Number(v).toFixed(decimals)}
+              formatter={(value: number | string) =>
+                Number(value).toFixed(decimals)
+              }
             />
 
             <Area
@@ -111,11 +126,19 @@ export default function HistoricalChart({
               activeDot={{ r: 4 }}
               fill="url(#fxFill)"
             />
+
+            {/* 渐变不改颜色，仅保留透明度过渡 */}
+            <defs>
+              <linearGradient id="fxFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopOpacity={0.2} />
+                <stop offset="95%" stopOpacity={0} />
+              </linearGradient>
+            </defs>
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* 末端小圆点效果，和 Recharts activeDot 搭配，保证始终有个终点标记 */}
+      {/* 末端小圆点的文本提示 */}
       {lastPoint ? (
         <div className="mt-2 text-right text-sm text-muted-foreground">
           {lastPoint.date} · {lastPoint.value.toFixed(decimals)}

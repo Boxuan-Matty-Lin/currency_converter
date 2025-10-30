@@ -2,7 +2,9 @@
 
 // app/page.tsx
 import { useCallback, useEffect, useMemo, useState } from "react";
-import HistoricalChart, { type Point } from "@/components/historical_chart";
+import type { ReactNode } from "react";
+import ChartWithInfo from "@/components/charts/ChartWithInfo";
+import type { Point } from "@/components/charts/HistoricalChart";
 import {
   CurrencySidebar,
   type Rates,
@@ -41,6 +43,9 @@ export default function Home() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState("");
   const [isChartModalOpen, setChartModalOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 1024px)").matches : false
+  );
 
   const refreshRates = useCallback(async () => {
     try {
@@ -95,12 +100,15 @@ export default function Home() {
     }
   }, []);
 
-  const handleSelectCurrency = useCallback((code: TargetCode) => {
-    setSelectedCode(code);
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setChartModalOpen(true);
-    }
-  }, []);
+  const handleSelectCurrency = useCallback(
+    (code: TargetCode) => {
+      setSelectedCode(code);
+      if (!isDesktop) {
+        setChartModalOpen(true);
+      }
+    },
+    [isDesktop]
+  );
 
   const closeChartModal = useCallback(() => setChartModalOpen(false), []);
 
@@ -123,44 +131,49 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [isChartModalOpen]);
 
-  const activeSeries = historySeries[selectedCode] ?? [];
-  const activeMeta = CURRENCY_META[selectedCode];
-  const chartTitle = `${selectedCode} / AUD`;
+  const activeSeries = useMemo(
+    () => historySeries[selectedCode] ?? [],
+    [historySeries, selectedCode]
+  );
+  const activeMeta = useMemo(() => CURRENCY_META[selectedCode], [selectedCode]);
+  const chartTitle = useMemo(() => `${selectedCode} / AUD`, [selectedCode]);
 
   const chartContent = useMemo(() => {
+    let inner: ReactNode;
+
     if (loadingHistory) {
-      return (
+      inner = (
         <div className="rounded-xl border p-6 text-sm text-muted-foreground">
           Loading history…
         </div>
       );
-    }
-
-    if (historyError) {
-      return (
+    } else if (historyError) {
+      inner = (
         <div className="rounded-xl border p-6 text-sm text-destructive">
           {historyError}
         </div>
       );
-    }
-
-    if (!activeSeries.length) {
-      return (
+    } else if (!activeSeries.length) {
+      inner = (
         <div className="rounded-xl border p-6 text-sm text-muted-foreground">
           No historical data available yet.
         </div>
       );
+    } else {
+      inner = (
+        <ChartWithInfo
+          title={chartTitle}
+          subtitle={activeMeta?.label}
+          data={activeSeries}
+          infoDefaultOpen={isDesktop}
+          className="w-full"
+        />
+      );
     }
 
-    return (
-      <HistoricalChart
-        title={chartTitle}
-        subtitle={activeMeta?.label}
-        data={activeSeries}
-        className="h-full"
-      />
-    );
-  }, [activeSeries, activeMeta?.label, chartTitle, historyError, loadingHistory]);
+    const wrapperClass = "w-full";
+    return <div className={wrapperClass}>{inner}</div>;
+  }, [activeSeries, activeMeta?.label, chartTitle, historyError, isDesktop, loadingHistory]);
 
   useEffect(() => {
     if (!isChartModalOpen) return;
@@ -175,13 +188,21 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setChartModalOpen(false);
-      }
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = (matches: boolean) => {
+      setIsDesktop(matches);
+      if (matches) setChartModalOpen(false);
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    update(mq.matches);
+
+    const listener = (event: MediaQueryListEvent) => update(event.matches);
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", listener);
+      return () => mq.removeEventListener("change", listener);
+    }
+    mq.addListener(listener);
+    return () => mq.removeListener(listener);
   }, []);
 
   return (
@@ -197,14 +218,14 @@ export default function Home() {
             rates={rates}
             loading={loadingRates}
             error={ratesError}
-            selectedCode={selectedCode}
+            selectedCode={isDesktop || isChartModalOpen ? selectedCode : null}
             onAmountChange={setAmount}
             onRefresh={refreshRates}
             onSelectCurrency={handleSelectCurrency}
           />
         </section>
 
-        <div className="hidden flex-1 flex-col gap-4 px-6 py-8 lg:flex">
+        <div className="hidden flex-1 flex-col gap-4 px-6 lg:px-8 py-6 lg:flex">
           {chartContent}
         </div>
       </div>
@@ -229,7 +250,7 @@ export default function Home() {
                 ✕
               </Button>
             </div>
-            <div className="p-4">{chartContent}</div>
+            <div className={isDesktop ? "p-4" : "p-0"}>{chartContent}</div>
           </div>
         </div>
       ) : null}

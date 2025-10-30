@@ -67,6 +67,12 @@ describe("CurrencySidebar", () => {
     expect(props.onSelectCurrency).toHaveBeenCalledWith("USD");
   });
 
+  it("does not highlight when selectedCode is null", () => {
+    renderSidebar({ selectedCode: null });
+    const card = screen.getByRole("button", { name: /USD/ });
+    expect(card).toHaveAttribute("aria-pressed", "false");
+  });
+
   it("shows error message when provided", () => {
     renderSidebar({ error: "Failed to load rates. Please try again." });
     expect(screen.getByText(/failed to load rates/i)).toBeInTheDocument();

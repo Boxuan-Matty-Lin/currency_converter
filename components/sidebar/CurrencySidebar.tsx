@@ -26,7 +26,7 @@ export type CurrencySidebarProps = {
   rates: Rates | null;
   loading: boolean;
   error: string;
-  selectedCode: TargetCode;
+  selectedCode?: TargetCode | null;
   onAmountChange: (value: string) => void;
   onRefresh: () => void;
   onSelectCurrency: (code: TargetCode) => void;
@@ -37,7 +37,7 @@ export function CurrencySidebar({
   rates,
   loading,
   error,
-  selectedCode,
+  selectedCode = null,
   onAmountChange,
   onRefresh,
   onSelectCurrency,
