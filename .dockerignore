@@ -22,6 +22,9 @@ logs
 .vscode
 .idea
 
-# Env files (改为在运行容器时注入)
+# Env files 
 .env
 .env.*
+
+*.png
+!public/**/*.png
