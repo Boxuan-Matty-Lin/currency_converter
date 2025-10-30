@@ -25,3 +25,13 @@
   - Tests are deterministic and independent, with sensible timeouts
   - On CI failure, artifacts are available, for example screenshots, video, and trace
   - Minimum one end-to-end check per core flow listed above
+
+
+### 4) Windows 10 flag rendering fallback
+- **Type:** Compatibility/UI · **Priority:** P2
+- **Requirement:** Provide a reliable fallback for currency flags on Windows 10 where flag emojis may not render. Replace missing flags with a consistent alternative, for example ISO code badges or icon assets, and keep accessible labels intact.
+- **DoD:**
+  - On a Windows 10 environment, no missing glyphs or tofu squares appear
+  - A clear fallback is shown for all currencies and remains consistent across browsers
+  - Accessible name includes the currency name for screen readers
+  - Visual regression checks confirm layout stability when fallbacks are used
