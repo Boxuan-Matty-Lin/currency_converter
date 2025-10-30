@@ -9,6 +9,7 @@ This is a currency conversion web application that allows users to input an amou
 - [Night mode – desktop](./night-mode-pc.png)
 - [Night mode – mobile (conversion view)](./night-mode-mobile-1.png)
 - [Night mode – mobile (history view)](./night-mode-mobile-2.png)
+- [Demo video](https://www.youtube.com/watch?v=73UDpnPi7-I)
 
 **Tech Stack:** ui:next.js 16 + react 19 + tailwindcss 4 + lucide / data:open exchange rates API / charts:recharts / testing:vitest + testing-library + happy-dom / tooling:pnpm + TypeScript + eslint
 
@@ -103,3 +104,7 @@ OXR_APP_ID=your-openexchangerates-app-id
    pnpm test:ci
    ```
    Generates coverage reports under `coverage/`.
+
+## Next Steps
+
+Due to the short timeline and small project scope, automated end-to-end testing (e.g. Playwright) has not been implemented yet. Additional improvements and optimizations are tracked in [Backlog.md](./Backlog.md).
