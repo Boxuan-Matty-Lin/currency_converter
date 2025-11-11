@@ -1,7 +1,7 @@
 'use client';
 
 // app/home/page.tsx
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import ChartWithInfo from "@/components/charts/ChartWithInfo";
 import {
@@ -15,6 +15,9 @@ import { useLatestRates } from "./hooks/useLatestRates";
 import { useResponsiveDesktop } from "./hooks/useResponsiveDesktop";
 import { useChartModal } from "./hooks/useChartModal";
 import { useHistorySeries } from "./hooks/useHistorySeries";
+
+const MemoChartWithInfo = memo(ChartWithInfo);
+MemoChartWithInfo.displayName = "MemoChartWithInfo";
 
 const HISTORY_DAYS = 14;
 // Optional: add a fallback to be extra safe when TARGET_CODES might be empty
@@ -76,42 +79,37 @@ export default function Home() {
   const activeMeta = useMemo(() => CURRENCY_META[selectedCode], [selectedCode]);
   const chartTitle = useMemo(() => `${selectedCode} / AUD`, [selectedCode]);
 
-  // Chart content: render by loading/error/data states
-  const chartContent = useMemo(() => {
-    let inner: ReactNode;
-
-    if (loadingHistory) {
-      inner = (
-        <div className="rounded-xl border p-6 text-sm text-muted-foreground">
-          Loading history…
-        </div>
-      );
-    } else if (historyError) {
-      inner = (
-        <div className="rounded-xl border p-6 text-sm text-destructive">
-          {historyError}
-        </div>
-      );
-    } else if (!activeSeries.length) {
-      inner = (
-        <div className="rounded-xl border p-6 text-sm text-muted-foreground">
-          No historical data available yet.
-        </div>
-      );
-    } else {
-      inner = (
-        <ChartWithInfo
-          title={chartTitle}
-          subtitle={activeMeta?.label}
-          data={activeSeries}
-          infoDefaultOpen={isDesktop}
-          className="w-full"
-        />
-      );
-    }
-
-    return <div className="w-full">{inner}</div>;
-  }, [activeSeries, activeMeta?.label, chartTitle, historyError, isDesktop, loadingHistory]);
+  let chartBody: ReactNode;
+  if (loadingHistory) {
+    chartBody = (
+      <div className="rounded-xl border p-6 text-sm text-muted-foreground">
+        Loading history…
+      </div>
+    );
+  } else if (historyError) {
+    chartBody = (
+      <div className="rounded-xl border p-6 text-sm text-destructive">
+        {historyError}
+      </div>
+    );
+  } else if (!activeSeries.length) {
+    chartBody = (
+      <div className="rounded-xl border p-6 text-sm text-muted-foreground">
+        No historical data available yet.
+      </div>
+    );
+  } else {
+    chartBody = (
+      <MemoChartWithInfo
+        title={chartTitle}
+        subtitle={activeMeta?.label}
+        data={activeSeries}
+        infoDefaultOpen={isDesktop}
+        className="w-full"
+      />
+    );
+  }
+  const chartContent = <div className="w-full">{chartBody}</div>;
 
   // NOTE: Removed page-level Escape listener and body scroll lock.
   // These are implemented inside useChartModal to avoid duplicate effects.
