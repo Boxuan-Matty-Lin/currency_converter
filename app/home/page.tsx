@@ -16,7 +16,7 @@ import { useResponsiveDesktop } from "./hooks/useResponsiveDesktop";
 import { useChartModal } from "./hooks/useChartModal";
 import { useHistorySeries } from "./hooks/useHistorySeries";
 
-const HISTORY_DAYS = 13;
+const HISTORY_DAYS = 14;
 // Optional: add a fallback to be extra safe when TARGET_CODES might be empty
 const DEFAULT_CODE = (TARGET_CODES[0] ?? "USD") as TargetCode;
 
