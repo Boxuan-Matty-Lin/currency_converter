@@ -118,7 +118,7 @@ export function toByCurrency(
   for (const t of targets) series[t] = [];
 
   for (const row of points) {
-    const d = row.date; // 已是 string
+    const d = row.date; 
     for (const t of targets) {
       const v = row[t];
       if (typeof v === "number") series[t].push({ date: d, value: v });
