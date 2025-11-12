@@ -90,6 +90,6 @@ export type HistoricalResponse = {
  * @returns A promise resolving to the `HistoricalResponse` payload.
  */
 export async function getHistorical(dateISO: string): Promise<HistoricalResponse> {
-  // dateISO = YYYY-MM-DD（UTC）
+  // dateISO = YYYY-MM-DD(UTC)
   return oxrFetch<HistoricalResponse>(`/historical/${dateISO}.json`);
 }

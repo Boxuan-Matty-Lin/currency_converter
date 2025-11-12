@@ -15,11 +15,11 @@ import { useTheme } from "next-themes";
 export type Point = { date: string; value: number };
 
 type Props = {
-  title?: string;                 // 左上角标题，例如 "USD / AUD"
-  subtitle?: string;              // 右上角小字，例如 "Foreign Exchange Rate"
-  data: Point[];                  // 形如 [{date:'2025-10-16', value:0.65}, ...]
-  decimals?: number;              // tooltip 小数位，默认 4
-  className?: string;             // 外层容器样式
+  title?: string;                 // title, such as "EUR to USD Exchange Rate"
+  subtitle?: string;              // subtitle, such as "Foreign Exchange Rate"
+  data: Point[];                  // data points, e.g., [{date:'2025-10-16', value:0.65}, ...]
+  decimals?: number;              // number of decimal places in tooltip, default 4
+  className?: string;             // outer container styles
 };
 
 export default function HistoricalChart({
@@ -29,7 +29,7 @@ export default function HistoricalChart({
   decimals = 4,
   className,
 }: Props) {
-  // 最后一个点，用于高亮当前值
+  // Last data point, used to highlight the current value
   const lastPoint = useMemo(
     () => (data && data.length ? data[data.length - 1] : null),
     [data]
@@ -79,7 +79,7 @@ export default function HistoricalChart({
       <div className="h-72 w-full">
         <ResponsiveContainer>
           <AreaChart data={data}>
-            {/* 时间轴保持简洁，不改默认配色 */}
+            {/* Keep the time axis simple, do not change the default colors */}
             <XAxis
               dataKey="date"
               tickLine={false}
@@ -97,18 +97,18 @@ export default function HistoricalChart({
               tickFormatter={(v) => Number(v).toFixed(decimals)}
             />
 
-            {/* 只调整 Tooltip 尺寸与圆角
-                暗黑模式下灰底和灰白字，其余保持原生 */}
+            {/* Only adjust Tooltip size and border radius
+                In dark mode, use gray background and gray-white text, keep others native */}
             <Tooltip
               contentStyle={{
                 ...(isDark
                   ? {
-                      background: "hsl(var(--muted))",           // 灰底
-                      color: "hsl(var(--muted-foreground))",     // 灰白字
+                      background: "hsl(var(--muted))",           // gray background
+                      color: "hsl(var(--muted-foreground))",     // gray-white text
                     }
                   : {}),
-                padding: "6px 8px",                              // 更小
-                borderRadius: "10px",                            // 圆角
+                padding: "6px 8px",                              // smaller
+                borderRadius: "10px",                            // rounded corners
               }}
               labelStyle={{ fontSize: 12, marginBottom: 2, lineHeight: 1.2 }}
               itemStyle={{ fontSize: 12, lineHeight: 1.2 }}
@@ -127,7 +127,7 @@ export default function HistoricalChart({
               fill="url(#fxFill)"
             />
 
-            {/* 渐变不改颜色，仅保留透明度过渡 */}
+
             <defs>
               <linearGradient id="fxFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopOpacity={0.2} />
@@ -138,7 +138,7 @@ export default function HistoricalChart({
         </ResponsiveContainer>
       </div>
 
-      {/* 末端小圆点的文本提示 */}
+      {/* Text tooltip for the last data point */}
       {lastPoint ? (
         <div className="mt-2 text-right text-sm text-muted-foreground">
           {lastPoint.date} · {lastPoint.value.toFixed(decimals)}
